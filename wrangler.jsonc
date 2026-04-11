@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "vizcrush-book",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "./book",
+    "not_found_handling": "404-page"
+  }
+}
