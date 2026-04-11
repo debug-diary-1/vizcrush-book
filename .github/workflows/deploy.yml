@@ -1,8 +1,11 @@
 name: Deploy book
 
+# Manual-only while the repo is private (GitHub Pro doesn't support private Pages).
+# When the book is ready to go public, re-enable Pages in Settings and uncomment
+# the push trigger below.
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   workflow_dispatch:
 
 permissions:
