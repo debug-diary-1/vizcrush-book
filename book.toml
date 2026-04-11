@@ -7,7 +7,7 @@ title = "The vizcrush Book"
 description = "GPU-Accelerated Data Primitives for Browser Visualization"
 
 [output.html]
-default-theme = "navy"
+default-theme = "light"
 preferred-dark-theme = "navy"
 curly-quotes = true
 mathjax-support = true
