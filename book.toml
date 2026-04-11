@@ -1,0 +1,34 @@
+[book]
+authors = ["The vizcrush team"]
+language = "en"
+multilingual = false
+src = "src"
+title = "The vizcrush Book"
+description = "GPU-Accelerated Data Primitives for Browser Visualization"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+curly-quotes = true
+mathjax-support = true
+copy-fonts = true
+git-repository-url = "https://github.com/pallavL01/vizcrush-book"
+edit-url-template = "https://github.com/pallavL01/vizcrush-book/edit/main/{path}"
+site-url = "/"
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true
+limit-results = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+
+[output.html.print]
+enable = true
