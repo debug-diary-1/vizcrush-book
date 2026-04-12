@@ -1,8 +1,8 @@
 # 3D: Voxels, Octrees, Frustum Culling
 
-> **TL;DR** — Three dimensions break things in two ways. Memory scales worse, and the camera introduces a whole new problem: _visibility_. This chapter is the 3D dialect of everything you learned in chapters 6 and 7, plus a new trick (frustum culling) that only makes sense once you have a camera.
+> **TL;DR**: Three dimensions break things in two ways. Memory scales worse, and the camera introduces a whole new problem: _visibility_. This chapter is the 3D dialect of everything you learned in chapters 6 and 7, plus a new trick (frustum culling) that only makes sense once you have a camera.
 
-The moment your data has a third dimension, every technique from earlier in the book needs a parallel story. A 2D scatter plot becomes a point cloud. A quadtree becomes an octree. Binning becomes voxelization. And there's one entirely new concept — frustum culling — that doesn't exist in 2D because 2D has no camera.
+The moment your data has a third dimension, every technique from earlier in the book needs a parallel story. A 2D scatter plot becomes a point cloud. A quadtree becomes an octree. Binning becomes voxelization. And there's one entirely new concept (frustum culling) that doesn't exist in 2D because 2D has no camera.
 
 This chapter covers the three 3D primitives vizcrush ships: `bin3d` (voxel binning), `octree` (3D spatial index), and `frustum` (camera-aware culling).
 
@@ -10,13 +10,13 @@ This chapter covers the three 3D primitives vizcrush ships: `bin3d` (voxel binni
 
 Two reasons, both of them about scaling.
 
-**Memory scales as N³, not N²**. A 128×128 grid has 16K cells. A 128×128×128 voxel grid has 2 _million_ cells. Double the resolution and you 8× the memory. You cannot naively scale up what worked in 2D — the bookkeeping cost grows faster than the data.
+**Memory scales as N³, not N²**. A 128×128 grid has 16K cells. A 128×128×128 voxel grid has 2 _million_ cells. Double the resolution and you 8× the memory. You cannot naively scale up what worked in 2D. The bookkeeping cost grows faster than the data.
 
 **Visibility is a first-class concern**. In a 2D chart, everything you care about is on the canvas at once. In a 3D scene, the camera looks at a specific region; everything outside that region is invisible and should never be processed. Skipping invisible points before you do anything else is often a bigger win than any algorithmic cleverness on the visible ones.
 
 ## Voxel Binning: 2D Binning in Three Dimensions
 
-A voxel is a 3D pixel. You define a bounding box, divide it into an `x_bins × y_bins × z_bins` grid, and count how many input points fall into each cell. The output is a flat array of length `x_bins · y_bins · z_bins` — indexed linearly as `grid[z · y_bins · x_bins + y · x_bins + x]`.
+A voxel is a 3D pixel. You define a bounding box, divide it into an `x_bins × y_bins × z_bins` grid, and count how many input points fall into each cell. The output is a flat array of length `x_bins · y_bins · z_bins`, indexed linearly as `grid[z · y_bins · x_bins + y · x_bins + x]`.
 
 The algorithm is exactly what you'd expect from 2D binning with one more axis:
 
@@ -31,7 +31,7 @@ for each point (px, py, pz):
 
 The output also carries the bin edges (`x_edges`, `y_edges`, `z_edges`) appended to the grid so the caller can label axes or map voxels back to world coordinates without recomputing anything.
 
-**Auto-ranging**: pass `NaN` for any min/max and vizcrush derives it from the data in one pass. This is the common case — you rarely know your exact data bounds ahead of time, and forcing the caller to compute them just to call the binning function is exactly the kind of friction that makes people write their own janky version.
+**Auto-ranging**: pass `NaN` for any min/max and vizcrush derives it from the data in one pass. This is the common case; you rarely know your exact data bounds ahead of time, and forcing the caller to compute them just to call the binning function is exactly the kind of friction that makes people write their own janky version.
 
 **Use cases**:
 
@@ -40,7 +40,7 @@ The output also carries the bin edges (`x_edges`, `y_edges`, `z_edges`) appended
 - **Medical imaging**: re-bin scattered samples onto a uniform grid for volume rendering.
 - **Any 3D histogram**: the "scatter plots lie" problem from chapter 6 is twice as bad in 3D because depth overlap masks density even more aggressively.
 
-**A warning about resolution**: picking `x_bins = y_bins = z_bins = 256` sounds reasonable until you realize you just allocated 16 million `f64` cells — 128 MB of RAM — before putting a single point in. For 3D, **start with resolution around 64 per axis and go up only if you have a reason**. A 64³ grid is 262K cells, fits comfortably in L2 cache, and renders beautifully for most point clouds.
+**A warning about resolution**: picking `x_bins = y_bins = z_bins = 256` sounds reasonable until you realize you just allocated 16 million `f64` cells (128 MB of RAM) before putting a single point in. For 3D, **start with resolution around 64 per axis and go up only if you have a reason**. A 64³ grid is 262K cells, fits comfortably in L2 cache, and renders beautifully for most point clouds.
 
 ## Octree: Quadtree's 3D Cousin
 
@@ -57,18 +57,18 @@ Everything you learned about quadtrees in chapter 7 translates directly: build c
 
 vizcrush's octree uses two implementation details worth calling out:
 
-**Arena allocation, not pointer trees.** Every node lives in a single flat `Vec<OctNode>`. Children are referenced by index into the arena, not by pointer. This is a huge cache-locality win — walking the tree touches contiguous memory, and serializing the whole tree is a single memory copy. It's also essential for passing the tree across the WASM boundary without rebuilding it on each side.
+**Arena allocation, not pointer trees.** Every node lives in a single flat `Vec<OctNode>`. Children are referenced by index into the arena, not by pointer. This is a huge cache-locality win: walking the tree touches contiguous memory, and serializing the whole tree is a single memory copy. It's also essential for passing the tree across the WASM boundary without rebuilding it on each side.
 
-**Partitioned index array.** Points aren't duplicated into leaf nodes. Instead, each node owns a `[start, end)` slice into a single shared `indices: Vec<u32>` array. Building the tree is essentially an in-place partial sort — points get reordered so that every subtree's points live in a contiguous run. Queries iterate those runs directly. No pointer chasing, no scattered reads.
+**Partitioned index array.** Points aren't duplicated into leaf nodes. Instead, each node owns a `[start, end)` slice into a single shared `indices: Vec<u32>` array. Building the tree is essentially an in-place partial sort. Points get reordered so that every subtree's points live in a contiguous run. Queries iterate those runs directly. No pointer chasing, no scattered reads.
 
-**The thresholds**: leaf nodes hold up to 64 points, maximum depth is 12. These come from the same reasoning as the quadtree — 64 is small enough that brute-force comparison in a leaf is cheap, and depth 12 (roughly 68 billion maximum cells) is way more than anyone needs but keeps pathological clustered inputs from blowing the stack.
+**The thresholds**: leaf nodes hold up to 64 points, maximum depth is 12. These come from the same reasoning as the quadtree: 64 is small enough that brute-force comparison in a leaf is cheap, and depth 12 (roughly 68 billion maximum cells) is way more than anyone needs but keeps pathological clustered inputs from blowing the stack.
 
 **When to use an octree vs. a voxel grid**:
 
 - Voxel grid: you want to know _density_ per region. Memory is fixed by resolution, not by point count.
-- Octree: you want to _query_ points — "all points inside this box," "k nearest to this cursor ray," "which points are inside this selection volume." Memory is fixed by point count, not by resolution.
+- Octree: you want to _query_ points: "all points inside this box," "k nearest to this cursor ray," "which points are inside this selection volume." Memory is fixed by point count, not by resolution.
 
-If your use case is "show me a heatmap of density" → voxel. If it's "let the user hover and pick" → octree. If it's both, build both — they're cheap and they solve different problems.
+If your use case is "show me a heatmap of density" → voxel. If it's "let the user hover and pick" → octree. If it's both, build both, they're cheap and they solve different problems.
 
 ## Frustum Culling: Don't Process What You Can't See
 
@@ -95,13 +95,13 @@ visible(P) = (dist_near(P)   > 0)
            & (dist_bottom(P) > 0)
 ```
 
-Six multiply-adds per plane, six planes, one AND reduction. 36 operations per point to answer "is this visible" — vastly cheaper than computing what color it should be or where it lands in screen space.
+Six multiply-adds per plane, six planes, one AND reduction. 36 operations per point to answer "is this visible". That's vastly cheaper than computing what color it should be or where it lands in screen space.
 
 ### Why Plane Normalization Matters
 
-When you first construct a plane from `(a, b, c, d)`, the `(a, b, c)` vector is probably not unit-length — it depends on how the plane was derived (projection matrices, cross products, etc). Non-normalized planes still give you the correct _sign_ for point-in-frustum tests, but the _magnitude_ of `dist(P)` isn't a real distance — it's scaled by `|(a, b, c)|`.
+When you first construct a plane from `(a, b, c, d)`, the `(a, b, c)` vector is probably not unit-length; it depends on how the plane was derived (projection matrices, cross products, etc). Non-normalized planes still give you the correct _sign_ for point-in-frustum tests, but the _magnitude_ of `dist(P)` isn't a real distance; it's scaled by `|(a, b, c)|`.
 
-For a pure visibility test, this doesn't matter. But the moment you want to compute "how far is this point from the near plane" — for LOD selection, depth sorting, or progressive rendering — you need real distances. vizcrush normalizes planes at construction by dividing all four coefficients by `|(a, b, c)|`, so `dist(P)` is always the true signed distance in world units.
+For a pure visibility test, this doesn't matter. But the moment you want to compute "how far is this point from the near plane" (for LOD selection, depth sorting, or progressive rendering), you need real distances. vizcrush normalizes planes at construction by dividing all four coefficients by `|(a, b, c)|`, so `dist(P)` is always the true signed distance in world units.
 
 ```
 |n|   = sqrt(a² + b² + c²)
@@ -122,7 +122,7 @@ At each octree node, test the node's bounding box against the frustum. Three out
 
 A scene with 10 million points but a camera looking at 5% of the space typically processes maybe 500K points. That's a 20× win before you do anything else.
 
-This is how every serious 3D viewer — Potree, deck.gl, Three.js with BVH — stays interactive on huge point clouds. It's not the renderer that's fast. It's the culling that makes the renderer's job small enough to be fast.
+This is how every serious 3D viewer, Potree, deck.gl, Three.js with BVH, stays interactive on huge point clouds. It's not the renderer that's fast. It's the culling that makes the renderer's job small enough to be fast.
 
 ## 3D Decision Cheat Sheet
 
@@ -134,6 +134,6 @@ This is how every serious 3D viewer — Potree, deck.gl, Three.js with BVH — s
 | Interactive point cloud viewer                    | `frustum` + `octree` (cull then query) |
 | Progressive LOD streaming                         | `frustum` (normalized) + distance-based LOD |
 
-Everything else you know from earlier chapters still applies — the 3D primitives compose with downsampling (LTTB over the visible set after culling), with streaming (voxel updates on a rolling window), and with normalization (remap z into a color channel). The dimensional jump changes the structures, not the ideas.
+Everything else you know from earlier chapters still applies, the 3D primitives compose with downsampling (LTTB over the visible set after culling), with streaming (voxel updates on a rolling window), and with normalization (remap z into a color channel). The dimensional jump changes the structures, not the ideas.
 
-Speaking of "the ideas" — most of this book has been about computing things faster or smaller. The next chapter is different. It's about computing things that _explain themselves_, so that a language model (or a curious human) can reason about your data without staring at ten million raw values.
+Speaking of "the ideas", most of this book has been about computing things faster or smaller. The next chapter is different. It's about computing things that _explain themselves_, so that a language model (or a curious human) can reason about your data without staring at ten million raw values.

@@ -1,6 +1,6 @@
 # Using vizcrush: A Tour in Code
 
-> **TL;DR** — Every vizcrush function, shown in the smallest possible TypeScript example. Copy, paste, ship. If you only read one chapter in this book, make it this one — and bookmark it.
+> **TL;DR**: Every vizcrush function, shown in the smallest possible TypeScript example. Copy, paste, ship. If you only read one chapter in this book, make it this one, and bookmark it.
 
 The rest of the book explains _what_ vizcrush does and _why_ it does it the way it does. This chapter is the bridge: how to actually call these functions from a real project. One code example per algorithm family, in TypeScript, with the understanding that every example assumes `pnpm install`, a bundler that handles ESM, and a modern browser.
 
@@ -14,7 +14,7 @@ vizcrush is published as a set of narrow packages. Install only what you need:
 pnpm add @vizcrush/core @vizcrush/downsample
 ```
 
-Add more as you go — `@vizcrush/bin`, `@vizcrush/aggregate`, `@vizcrush/spatial`, `@vizcrush/spatial3d`, `@vizcrush/bin3d`, `@vizcrush/transform`, `@vizcrush/ai`, `@vizcrush/react`.
+Add more as you go, `@vizcrush/bin`, `@vizcrush/aggregate`, `@vizcrush/spatial`, `@vizcrush/spatial3d`, `@vizcrush/bin3d`, `@vizcrush/transform`, `@vizcrush/ai`, `@vizcrush/react`.
 
 ## Step 1: Initialize and Check Capabilities
 
@@ -32,7 +32,7 @@ console.log(ctx.capabilities);
 // { webgpu: true, wasm: true, wasmSimd: true, webgl2: true }
 ```
 
-You only call `init()` once per page. The returned `ctx` object is shared by every other vizcrush call. If WebGPU is available, GPU-parallel operations (bin2d, spatial indexes at scale) will use it automatically. If not, they fall back to WASM+SIMD, then scalar WASM, then pure JS — the reader will not notice.
+You only call `init()` once per page. The returned `ctx` object is shared by every other vizcrush call. If WebGPU is available, GPU-parallel operations (bin2d, spatial indexes at scale) will use it automatically. If not, they fall back to WASM+SIMD, then scalar WASM, then pure JS. The reader will not notice.
 
 Nothing else in this chapter needs you to look at `ctx` again. It's always there in the background doing the right thing.
 
@@ -46,7 +46,7 @@ import { lttb } from "@vizcrush/downsample";
 // x and y are Float64Arrays, same length
 const { x: outX, y: outY } = await lttb(x, y, 1920);
 
-// outX and outY have length 1920 — feed them to your chart
+// outX and outY have length 1920, feed them to your chart
 ```
 
 That's the whole API. Pass typed arrays in, get typed arrays out. If `x` is already sorted (which it is for time series), you don't need to do anything else.
@@ -80,7 +80,7 @@ const result = await bin2d(x, y, {
 // result.xEdges and result.yEdges give you the bin boundaries
 ```
 
-Render `result.counts` as a heatmap — map count to color, done. You now see density instead of a blob of dots.
+Render `result.counts` as a heatmap, map count to color, done. You now see density instead of a blob of dots.
 
 For visually isotropic clusters, use `hexbin` instead:
 
@@ -88,7 +88,7 @@ For visually isotropic clusters, use `hexbin` instead:
 import { hexbin } from "@vizcrush/bin";
 
 const hexes = await hexbin(x, y, { radius: 10 });
-// hexes is an array of { x, y, count } — one per non-empty hex
+// hexes is an array of { x, y, count }, one per non-empty hex
 ```
 
 ## Step 4: Index Points for Hover and Range Queries
@@ -111,7 +111,7 @@ const indices = queryRange(tree, {
 // k-NN query: the 5 closest points to the cursor
 const nearest = queryNearest(tree, cursorX, cursorY, 5);
 
-// indices / nearest are Uint32Arrays — map them back to your data
+// indices / nearest are Uint32Arrays, map them back to your data
 ```
 
 For fixed-radius queries (brush selection, find-neighbors-within-r), use a hash grid instead:
@@ -123,7 +123,7 @@ const grid = await buildHashGrid(x, y, { cellSize: 20 });
 const neighbors = hashGridQueryRadius(grid, cursorX, cursorY, 15);
 ```
 
-The right index depends on the query pattern — see the decision tree in chapter 12.
+The right index depends on the query pattern, see the decision tree in chapter 12.
 
 ## Step 5: Stream Live Data Without Re-scanning
 
@@ -159,11 +159,11 @@ function onNewBatch(newValues: Float64Array) {
 }
 ```
 
-The point of `appendAndDownsample` is that it's a _single pass_ — append, evict, and LTTB in one operation with no intermediate allocations. The GC has nothing to do. 60fps streaming charts become boring to build.
+The point of `appendAndDownsample` is that it's a _single pass_, append, evict, and LTTB in one operation with no intermediate allocations. The GC has nothing to do. 60fps streaming charts become boring to build.
 
 ## Step 6: Percentiles on a Stream
 
-Live SLA monitoring — p50, p95, p99 over the rolling window:
+Live SLA monitoring, p50, p95, p99 over the rolling window:
 
 ```ts
 import { DDSketch } from "@vizcrush/aggregate";
@@ -181,7 +181,7 @@ function onLatencyBatch(latencies: Float64Array) {
 }
 ```
 
-`DDSketch` gives relative-error guarantees — ideal when latencies span microseconds to seconds. For general percentile work without the relative-error story, `KllSketch` is the same API.
+`DDSketch` gives relative-error guarantees, ideal when latencies span microseconds to seconds. For general percentile work without the relative-error story, `KllSketch` is the same API.
 
 For cardinality ("how many distinct users"), use `HyperLogLog` the same way:
 
@@ -245,7 +245,7 @@ The culling step is the win. You can render 20M-point scans at 60fps because 95%
 
 ## Step 9: Let the Library Decide
 
-If you're not sure which algorithm to pick — or you're building an agent that needs to decide for itself — call `autoConfig`:
+If you're not sure which algorithm to pick, or you're building an agent that needs to decide for itself, call `autoConfig`:
 
 ```ts
 import { autoConfig } from "@vizcrush/ai";
@@ -263,7 +263,7 @@ console.log(recommendation);
 // }
 ```
 
-The `reasoning` field is the interesting part — it's a short human-readable string explaining why the recommendation is what it is. You can show it to a user, feed it to an LLM, or ignore it. Everything else is a drop-in parameter for the actual algorithm calls.
+The `reasoning` field is the interesting part, it's a short human-readable string explaining why the recommendation is what it is. You can show it to a user, feed it to an LLM, or ignore it. Everything else is a drop-in parameter for the actual algorithm calls.
 
 For a quick summary of any dataset:
 
@@ -277,7 +277,7 @@ const anomalies = detectAnomalies(y, 3.0);
 // Float64Array of [index, value, score, ...]
 
 const shape = computeShapeVector(y, 16);
-// Float64Array of 16 features — cosine-similar to "similar" charts
+// Float64Array of 16 features, cosine-similar to "similar" charts
 ```
 
 ## Step 10: React Hook
@@ -305,7 +305,7 @@ The hook handles:
 - Suspending on the WASM load
 - Cleaning up GPU buffers on unmount
 
-If you're not using React, the vanilla API above is all you need — the hook is a convenience, not a requirement.
+If you're not using React, the vanilla API above is all you need, the hook is a convenience, not a requirement.
 
 ## The Mental Model
 
@@ -315,8 +315,8 @@ Every vizcrush function follows the same shape:
 2. **Output**: another `Float64Array` (or a small handle for things like spatial indexes). Same contract.
 3. **No rendering**: vizcrush never touches the DOM, the canvas, or the chart library. You pass the output to your renderer of choice.
 
-Once you internalize this, every new algorithm in the library fits the same template. `bin1d` takes an array, returns an array. `lttb` takes arrays, returns arrays. `compute_shape_vector` takes an array, returns an array. You never wrestle with object models or configuration schemas — typed arrays all the way down.
+Once you internalize this, every new algorithm in the library fits the same template. `bin1d` takes an array, returns an array. `lttb` takes arrays, returns arrays. `compute_shape_vector` takes an array, returns an array. You never wrestle with object models or configuration schemas, typed arrays all the way down.
 
 The next time you find yourself about to write `for (let i = 0; i < 500_000; i++)` in JavaScript, stop. Check this book's decision chapter. There's probably a vizcrush function that already did the work, faster, without blocking your main thread.
 
-The remaining three chapters are for the curious: how vizcrush stays working when the hardware doesn't cooperate, the performance lessons I learned the hard way, and — for anyone who wants to dig into the math — a reference of the formulas behind the algorithms.
+The remaining three chapters are for the curious: how vizcrush stays working when the hardware doesn't cooperate, the performance lessons I learned the hard way, and, for anyone who wants to dig into the math, a reference of the formulas behind the algorithms.

@@ -1,10 +1,10 @@
 # The Wall
 
-> **TL;DR** — Chart libraries are great at 10K points and surprisingly bad at 100K. This chapter is about why that cliff exists, why the obvious fixes (workers, servers) don't fix it, and where vizcrush fits in.
+> **TL;DR**: Chart libraries are great at 10K points and surprisingly bad at 100K. This chapter is about why that cliff exists, why the obvious fixes (workers, servers) don't fix it, and where vizcrush fits in.
 
 Here's something nobody tells you when you start building data dashboards: chart libraries have a cliff.
 
-D3, Plotly, ECharts, Chart.js — they all work beautifully at 10K points. At 50K they start to stutter on pan and zoom. At 100K you can see frames dropping. At 500K your users start filing bug reports. At a million points, the browser gives up entirely.
+D3, Plotly, ECharts, Chart.js: they all work beautifully at 10K points. At 50K they start to stutter on pan and zoom. At 100K you can see frames dropping. At 500K your users start filing bug reports. At a million points, the browser gives up entirely.
 
 I call this the 100K Datapoint Wall.
 
@@ -30,7 +30,7 @@ That's not a rendering problem. That's a data problem.
 
 The knee-jerk reaction is "throw it in a Web Worker." I tried this. Here's what actually happens:
 
-You call `postMessage` to send your data to the worker. JavaScript has to serialize that data — and serializing 100K objects takes about 150ms. The worker processes it (maybe 50ms), serializes the result back (another 50ms), and posts it to the main thread.
+You call `postMessage` to send your data to the worker. JavaScript has to serialize that data, and serializing 100K objects takes about 150ms. The worker processes it (maybe 50ms), serializes the result back (another 50ms), and posts it to the main thread.
 
 Total round trip: 250ms. For a single frame.
 

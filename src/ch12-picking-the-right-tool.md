@@ -1,10 +1,10 @@
 # Picking the Right Tool
 
-> **TL;DR** — A flowchart from "what are you trying to do?" to "here's the function to call." Bookmark this chapter. You'll come back to it more than any other.
+> **TL;DR**: A flowchart from "what are you trying to do?" to "here's the function to call." Bookmark this chapter. You'll come back to it more than any other.
 
 You've now seen everything vizcrush ships: four downsamplers, three binning strategies, four spatial indexes, seven streaming sketches, five transforms, three 3D primitives, four AI utilities. That's a lot of functions. The question this chapter answers is: **which one do you actually reach for, when?**
 
-If you're already an expert and you just want the flowchart, skip ahead to the end of the chapter. If you want to understand _why_ the flowchart looks the way it does, read straight through — every branch in the tree maps back to a decision we made for a real reason.
+If you're already an expert and you just want the flowchart, skip ahead to the end of the chapter. If you want to understand _why_ the flowchart looks the way it does, read straight through, every branch in the tree maps back to a decision we made for a real reason.
 
 ## The Three Questions
 
@@ -107,7 +107,7 @@ Let's walk through seven real situations and see how the tree resolves them. The
 
 **Path**: streaming → `StreamingStats` for running mean/std/min/max, `appendAndDownsample` for the chart.
 
-**Why not "just use LTTB every second"**: you'd re-scan the entire buffer on every tick. `appendAndDownsample` is specifically designed to avoid the double pass — it combines the append, the eviction, and the LTTB in a single operation with no intermediate allocation.
+**Why not "just use LTTB every second"**: you'd re-scan the entire buffer on every tick. `appendAndDownsample` is specifically designed to avoid the double pass, it combines the append, the eviction, and the LTTB in a single operation with no intermediate allocation.
 
 **Add a t-digest or DDSketch** alongside if the user also wants to see p50/p95/p99 bands.
 
@@ -155,7 +155,7 @@ Let's walk through seven real situations and see how the tree resolves them. The
 
 **Path**: call **`summarize`** and **`compute_shape_vector`** (chapter 11). Feed the resulting 8–32 floats to the model instead of the raw data. If the model asks "are there anomalies," also call **`detect_anomalies`** and pass the flagged indices.
 
-**Also consider `auto_config`**: it'll give the model a structured recommendation it can apply or override. The `reasoning` field is a short human-readable string — ideal for prompt injection into the assistant's context.
+**Also consider `auto_config`**: it'll give the model a structured recommendation it can apply or override. The `reasoning` field is a short human-readable string, ideal for prompt injection into the assistant's context.
 
 ## Parameter Guidance
 
@@ -163,41 +163,41 @@ The decision tree tells you _which_ algorithm. The next question is _with what p
 
 ### Downsampling
 
-- **`target_points`** — start with chart width in pixels (~1920 for desktop, ~800 for mobile). Double it for retina displays if you want extra margin for sharp lines.
-- **MinMaxLTTB bucket multiplier** — the default 4× is almost always right. Higher preserves more spikes but slows things down.
+- **`target_points`**, start with chart width in pixels (~1920 for desktop, ~800 for mobile). Double it for retina displays if you want extra margin for sharp lines.
+- **MinMaxLTTB bucket multiplier**, the default 4× is almost always right. Higher preserves more spikes but slows things down.
 
 ### Binning
 
-- **`bins`** — target a density where most cells have >5 points. For 500K points, 128×128 is a good start. For 50K, try 64×64.
-- **`3D bins`** — start at 64³ or less. Memory scales cubically.
+- **`bins`**, target a density where most cells have >5 points. For 500K points, 128×128 is a good start. For 50K, try 64×64.
+- **`3D bins`**, start at 64³ or less. Memory scales cubically.
 
 ### Spatial indexes
 
-- **Quadtree leaf size** — 64. Don't touch unless you're building a specialized tool.
-- **Hash grid cell size** — match your typical query radius. Slightly larger is safer than slightly smaller.
+- **Quadtree leaf size**, 64. Don't touch unless you're building a specialized tool.
+- **Hash grid cell size**, match your typical query radius. Slightly larger is safer than slightly smaller.
 
 ### Streaming sketches
 
-- **HyperLogLog precision `p`** — 14 gives ~0.8% error using 16KB. Drop to 12 for ~1.6% error using 4KB if memory is tight.
-- **KLL `k`** — 200 gives ~1% rank error. 400 for ~0.5%.
-- **DDSketch `α`** — 0.01 (1% relative error) for most latency work. 0.005 if you're obsessive.
-- **t-digest compression** — 100 is fine for most dashboards. 200 if you care about p99.9.
-- **Count-Min Sketch (width, depth)** — (1024, 5) is the default and handles "what are the top-k heavy hitters" for millions of distinct keys.
+- **HyperLogLog precision `p`**, 14 gives ~0.8% error using 16KB. Drop to 12 for ~1.6% error using 4KB if memory is tight.
+- **KLL `k`**, 200 gives ~1% rank error. 400 for ~0.5%.
+- **DDSketch `α`**, 0.01 (1% relative error) for most latency work. 0.005 if you're obsessive.
+- **t-digest compression**, 100 is fine for most dashboards. 200 if you care about p99.9.
+- **Count-Min Sketch (width, depth)**, (1024, 5) is the default and handles "what are the top-k heavy hitters" for millions of distinct keys.
 
 ### AI utilities
 
-- **Anomaly sensitivity** — 3.0 (modified z-score equivalent of 3σ). Raise to 4–5 to reduce false positives; lower to 2 to catch softer anomalies.
-- **Shape vector dimensions** — 16 to 32. More dimensions capture more nuance but make comparison noisier.
+- **Anomaly sensitivity**, 3.0 (modified z-score equivalent of 3σ). Raise to 4–5 to reduce false positives; lower to 2 to catch softer anomalies.
+- **Shape vector dimensions**, 16 to 32. More dimensions capture more nuance but make comparison noisier.
 
 ## A Two-Line Summary
 
 Most problems in visualization fall into one of two buckets:
 
-1. **Too much data for the screen** — downsample, bin, or sketch.
-2. **Too much data for the query** — index it (quadtree, kd-tree, hash grid, octree) or cull it (frustum, range filter).
+1. **Too much data for the screen**, downsample, bin, or sketch.
+2. **Too much data for the query**, index it (quadtree, kd-tree, hash grid, octree) or cull it (frustum, range filter).
 
 Almost every algorithm in this book is a specific answer to one of those two problems. When you're stuck, start with that framing and pick the tool that matches your structure.
 
 Everything else is parameters.
 
-The flowchart tells you _what_. The next chapter tells you _how_ — with real code, real imports, and real API calls you can copy and paste.
+The flowchart tells you _what_. The next chapter tells you _how_, with real code, real imports, and real API calls you can copy and paste.

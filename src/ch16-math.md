@@ -1,8 +1,8 @@
 # The Math Behind It All
 
-> **TL;DR** — The formulas every earlier chapter referred to but didn't spell out. Safe to skip. Useful if you want to modify the algorithms, verify them, or argue about them on the internet.
+> **TL;DR**: The formulas every earlier chapter referred to but didn't spell out. Safe to skip. Useful if you want to modify the algorithms, verify them, or argue about them on the internet.
 
-This chapter is the appendix, not the finale. If the earlier chapters gave you the story, this chapter is the receipts — the actual formulas behind each algorithm, written out for anyone who wants to check the homework.
+This chapter is the appendix, not the finale. If the earlier chapters gave you the story, this chapter is the receipts, the actual formulas behind each algorithm, written out for anyone who wants to check the homework.
 
 You don't need any of this to _use_ vizcrush. You might want some of it if you plan to port an algorithm, tune a parameter past its default, or write your own variant. Skim the headings and dip in where you're curious.
 
@@ -14,7 +14,7 @@ Given three points (x₁,y₁), (x₂,y₂), (x₃,y₃):
 Area = ½ |x₁(y₂ - y₃) + x₂(y₃ - y₁) + x₃(y₁ - y₂)|
 ```
 
-This is the absolute value of half the cross product of vectors (P₂-P₁) and (P₃-P₁). No square roots or trigonometry. Three multiplications, five additions, one absolute value. This is what makes LTTB fast — the inner loop does almost no work per candidate.
+This is the absolute value of half the cross product of vectors (P₂-P₁) and (P₃-P₁). No square roots or trigonometry. Three multiplications, five additions, one absolute value. This is what makes LTTB fast: the inner loop does almost no work per candidate.
 
 ## Welford's Derivation
 
@@ -36,7 +36,7 @@ For the sum of squared deviations M₂:
 M₂,ₙ₊₁ = M₂,ₙ + (xₙ₊₁ - μₙ)(xₙ₊₁ - μₙ₊₁)
 ```
 
-The product `(xₙ₊₁ - μₙ)(xₙ₊₁ - μₙ₊₁)` is always non-negative (both factors have the same sign because μₙ₊₁ is between μₙ and xₙ₊₁). This means M₂ increases monotonically — no cancellation errors.
+The product `(xₙ₊₁ - μₙ)(xₙ₊₁ - μₙ₊₁)` is always non-negative (both factors have the same sign because μₙ₊₁ is between μₙ and xₙ₊₁). This means M₂ increases monotonically, so there are no cancellation errors.
 
 Sample variance: `σ² = M₂ / (n - 1)`
 
@@ -107,7 +107,7 @@ raw = α_m · m² / Σᵢ 2^(-M[i])
 
 where `α_m` is a bias-correction constant (0.7213/(1+1.079/m) for large m).
 
-Small-range correction: when many registers are still zero, linear counting is more accurate — `m · ln(m / zeros)`. Large-range correction uses the Heule et al. empirical bias table (not reproduced here).
+Small-range correction: when many registers are still zero, linear counting is more accurate: `m · ln(m / zeros)`. Large-range correction uses the Heule et al. empirical bias table (not reproduced here).
 
 ## Hexagonal Grid Coordinates
 
@@ -127,4 +127,4 @@ offset = r if row is odd, else 0
 col = round((x - x_min - offset) / (2r))
 ```
 
-This is an approximation. The exact nearest-hex computation requires checking the three closest candidates — but the round-based approximation is correct for >98% of points and the error only occurs at hex boundaries where it doesn't matter for visualization.
+This is an approximation. The exact nearest-hex computation requires checking the three closest candidates. The round-based approximation is correct for >98% of points and the error only occurs at hex boundaries where it doesn't matter for visualization.

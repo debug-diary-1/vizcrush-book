@@ -12,12 +12,12 @@
 
 # The Algorithms
 
-- [LTTB — The Algorithm That Started Everything](./ch04-lttb.md)
-- [MinMaxLTTB, M4, LTOB — When LTTB Isn't Enough](./ch05-other-downsamplers.md)
+- [LTTB: The Algorithm That Started Everything](./ch04-lttb.md)
+- [MinMaxLTTB, M4, LTOB: When LTTB Isn't Enough](./ch05-other-downsamplers.md)
 - [Binning: When Scatter Plots Lie To You](./ch06-binning.md)
 - [Quadtrees, kd-trees, Hash Grids: Finding Needles Fast](./ch07-spatial-indexing.md)
 - [Streaming and Sketches: Numbers That Never Stop](./ch08-streaming-sketches.md)
-- [Sorting, Normalizing, Filtering, Reshaping — The Grunt Work](./ch09-transforms.md)
+- [Sorting, Normalizing, Filtering, Reshaping: The Grunt Work](./ch09-transforms.md)
 - [3D: Voxels, Octrees, Frustum Culling](./ch10-three-d.md)
 - [AI-Assisted Viz: Anomaly, Shape, Auto-Config](./ch11-ai-assisted.md)
 
