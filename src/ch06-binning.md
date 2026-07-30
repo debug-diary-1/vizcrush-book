@@ -36,7 +36,7 @@ grid[row * num_cols + col] = count of points in that cell
 
 For a 128×128 grid, you get 16,384 cells. Each cell holds a count. You can color-map these counts to produce a heatmap. Suddenly those invisible overlapping dots reveal clusters, corridors, and density gradients.
 
-This is where the GPU shines. Each input point's bin assignment is independent of every other point. A WebGPU compute shader dispatches one thread per point:
+Binning is also as parallel as problems get: each input point's bin assignment is independent of every other point's. That's why GPU people love it — a compute shader can dispatch one thread per point:
 
 ```wgsl
 let xi = u32((px - x_min) / x_range * f32(x_bins));
@@ -44,7 +44,7 @@ let yi = u32((py - y_min) / y_range * f32(y_bins));
 atomicAdd(&grid[yi * x_bins + xi], 1u);
 ```
 
-The `atomicAdd` is essential. Multiple GPU threads might try to increment the same cell simultaneously. Without atomic operations, you'd get race conditions, lost counts, corrupted data. `atomicAdd` guarantees correctness at the cost of slight serialization when threads collide on the same cell (rare in practice with 16K+ cells).
+The `atomicAdd` is essential in that world. Multiple GPU threads might try to increment the same cell simultaneously; without atomic operations you'd get race conditions and lost counts. Worth knowing — but also worth knowing that vizcrush ships exactly this shader only as an unwired draft. The shipping bin2d runs on WASM/JS, because at browser-realistic sizes the CPU finishes before GPU dispatch overhead pays for itself (chapter 3 has the arithmetic).
 
 ## Hexagonal Binning
 

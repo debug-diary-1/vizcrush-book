@@ -18,11 +18,11 @@ Here's the layer cake:
 ├─────────────────────────────────────────────┤
 │  Data Compute: vizcrush                     │  ← THIS LAYER
 ├─────────────────────────────────────────────┤
-│  GPU Access: WebGPU, WebAssembly            │  ← hardware
+│  Browser Compute: WebAssembly, JS engines   │  ← hardware
 └─────────────────────────────────────────────┘
 ```
 
-The rendering layer is mature. The GPU access layer is emerging. The data compute layer in between was missing. That's the gap.
+The rendering layer is mature. The browser compute layer is mature. The data compute layer in between was missing. That's the gap.
 
 ## The Zero-Loss Thing
 

@@ -73,7 +73,7 @@ Is it streaming?
    │    ├─ Viewport / range (zoom/pan)       → quadtree
    │    ├─ Hover picking (k-NN)              → kd-tree
    │    ├─ Fixed-radius brush / lasso        → hash grid
-   │    ├─ GPU-built structure               → Morton codes
+   │    ├─ Sort-based, cache-friendly build  → Morton codes
    │    └─ Any of the above, but 3D          → octree (+ frustum)
    │
    ├─ 3D with a camera?

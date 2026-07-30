@@ -43,13 +43,13 @@ When the user zooms to a viewport [xMin, xMax], we need to extract just those po
 
 A scatter plot of file sizes, request latencies, or cryptocurrency market caps will always look the same: a few huge values dominate the top, and 99% of the data is squashed into the bottom 5% of the chart. The fix is changing the axis scale instead of changing the data. But the chart library still has to compute log values for every point, often in JavaScript, often on every redraw.
 
-vizcrush moves that work into the compute layer: `log_transform`, `ln_transform`, `log10_transform`, and `power_transform` each map an input array to an output array in a single SIMD-friendly pass. The result is a `Float64Array` you hand to your chart library on a linear axis: the math has already happened.
+vizcrush moves that work into the compute layer: `log_transform`, `ln_transform`, `log10_transform`, and `power_transform` each map an input array to an output array in a single pass. The result is a `Float64Array` you hand to your chart library on a linear axis: the math has already happened.
 
 The algorithm is obvious. The only trick worth mentioning: for an arbitrary-base logarithm, compute `ln(base)` _once_ outside the loop and multiply by its reciprocal per element. Natural log is expensive, and computing it once instead of once per element is the kind of change that costs nothing and pays back forever.
 
 Non-positive inputs become `NaN`, not an error and not a silent zero. NaN propagates through the chart library as a gap, which is exactly what should happen for log(−1).
 
-Power transforms apply the same SIMD batching. A million-point square-root transform is around half a millisecond on the WASM path.
+Power transforms take the same single-pass shape: one tight loop, no allocations beyond the output array.
 
 ## Quantile Normalization
 

@@ -8,7 +8,7 @@
 
 - [The Wall](./ch01-the-wall.md)
 - [What vizcrush Actually Does](./ch02-what-vizcrush-does.md)
-- [The Two Engines: WASM and WebGPU](./ch03-two-engines.md)
+- [The Two Engines: WASM and the JS Core](./ch03-two-engines.md)
 
 # The Algorithms
 

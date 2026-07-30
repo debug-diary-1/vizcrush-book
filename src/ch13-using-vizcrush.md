@@ -18,7 +18,7 @@ Add more as you go, `@vizcrush/bin`, `@vizcrush/aggregate`, `@vizcrush/spatial`,
 
 ## Step 1: Initialize and Check Capabilities
 
-Before you call anything, ask vizcrush what it can do. The `init()` call detects WebGPU, WebAssembly, SIMD support, and picks the fastest available backend automatically.
+Before you call anything, ask vizcrush what it can do. The `init()` call probes the environment and picks the backend: the Rust/WASM build when WebAssembly is available, the pure-JS core otherwise.
 
 ```ts
 import { init } from "@vizcrush/core";
@@ -26,13 +26,13 @@ import { init } from "@vizcrush/core";
 const ctx = await init();
 
 console.log(ctx.backend);
-// 'webgpu' | 'wasm-simd' | 'wasm' | 'js'
+// 'wasm' | 'js'
 
 console.log(ctx.capabilities);
-// { webgpu: true, wasm: true, wasmSimd: true, webgl2: true }
+// { webgpu: true, wasm: true, wasmSimd: true, sharedArrayBuffer: false }
 ```
 
-You only call `init()` once per page. The returned `ctx` object is shared by every other vizcrush call. If WebGPU is available, GPU-parallel operations (bin2d, spatial indexes at scale) will use it automatically. If not, they fall back to WASM+SIMD, then scalar WASM, then pure JS. The reader will not notice.
+You only call `init()` once per page. The returned `ctx` object is shared by every other vizcrush call. The `capabilities` object is raw environment probes for your own diagnostics; only `wasm` decides the backend. Per call, small inputs run on the JS core regardless (the WASM boundary has a fixed cost that tiny arrays never pay back), and you can force a path with `{ backend: "js" | "wasm" }` if you're benchmarking. The reader will not notice any of this.
 
 Nothing else in this chapter needs you to look at `ctx` again. It's always there in the background doing the right thing.
 
@@ -61,7 +61,7 @@ const { x: outX, y: outY } = await minMaxLttb(x, y, 1920);
 
 Same signature, different guarantees. See chapter 5 for when to pick which.
 
-**Sync variant**: if you're in a hot render loop and can't `await`, use `lttbSync`. It's available on the WASM+JS paths (not GPU) and returns the result immediately.
+**Sync variant**: if you're in a hot render loop and can't `await`, use `lttbSync`. It runs the JS core directly and returns the result immediately.
 
 ## Step 3: Build a 2D Density Heatmap
 

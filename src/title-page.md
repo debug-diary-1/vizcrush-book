@@ -1,6 +1,6 @@
 # The vizcrush Book
 
-_GPU-Accelerated Data Primitives for Browser Visualization_
+_High-Performance Data Primitives for Browser Visualization_
 
 ---
 
@@ -35,7 +35,7 @@ That's the deal: I'll tell you the _why_: the thing a textbook won't. You handle
 
 ### How to read it
 
-- **Chapters 1–3** set up the problem and the two engines (WebAssembly and WebGPU). Read these first, in order.
+- **Chapters 1–3** set up the problem and the two engines (Rust/WebAssembly and the pure-JS core). Read these first, in order.
 - **Chapters 4–11** tour the algorithms, one family at a time. Each chapter is self-contained; skim the TL;DRs and dive into whichever ones are relevant to your problem.
 - **Chapters 12–13** are the "decide and build" chapters: pick the right tool, then see it in code. If you only read two chapters, read these two.
 - **Chapters 14–16** are the under-the-hood tour: fallbacks, performance lessons, and the math. Optional, but the fun part if you've already finished the rest.

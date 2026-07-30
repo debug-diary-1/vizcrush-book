@@ -53,8 +53,8 @@ Server aggregation makes sense for initial page load. It falls apart for interac
 
 vizcrush takes a different approach: do the computation _in the browser_ but not in JavaScript.
 
-The core algorithms are compiled to WebAssembly with SIMD vector instructions enabled. For parallel workloads like 2D binning, we use WebGPU compute shaders that run directly on the GPU. The JavaScript layer is a thin wrapper that detects what hardware is available and picks the fastest path.
+The core algorithms are written in Rust and compiled to WebAssembly, with a pure-JavaScript implementation of every algorithm alongside it — a "fallback" that, in some browsers, turns out to be the faster path (chapter 3 has the surprising numbers). A thin JavaScript layer detects what the environment supports and picks accordingly.
 
-No serialization. No network calls. No Web Worker boundary. The WASM module reads directly from the same typed array memory that JavaScript uses. A million-point LTTB downsample takes 1.7ms on the JS fallback path and under 200 microseconds with WASM+SIMD.
+No serialization. No network calls. No Web Worker boundary. The WASM module reads directly from the same typed array memory that JavaScript uses. A million-point LTTB downsample takes about 2 milliseconds.
 
 That's the 30-second pitch. The rest of the book is _how_.

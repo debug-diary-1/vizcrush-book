@@ -70,7 +70,7 @@ area = |(prev_x − next_x) · (curr_y − prev_y)
        − (prev_x − curr_x) · (next_y − prev_y)|
 ```
 
-Three multiplications, five additions, one absolute value per candidate point. That's why LTTB is fast: the inner loop does almost no work, and every operation maps cleanly onto SIMD lanes.
+Three multiplications, five additions, one absolute value per candidate point. That's why LTTB is fast: the inner loop does almost no work.
 
 The same trick shows up later in the book under a different name (the math chapter at the end derives it properly). For now, just know that this is what makes a million-point downsample take under two milliseconds.
 

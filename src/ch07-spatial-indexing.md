@@ -63,11 +63,11 @@ Interleaved: (x bits in even positions, y bits in odd positions)
 
 The resulting number has the beautiful property that points which are close in 2D are _mostly_ close in Morton order (the Z-curve has a few long jumps at quadrant boundaries, but they're rare). Close enough, in any case, that sorting by Morton code gets you a tree-building-friendly ordering for free.
 
-### Why This Matters on the GPU
+### Why This Shape Matters
 
-Building a traditional quadtree on the GPU is a nightmare. Tree construction is recursive, and GPUs hate recursion: they want every thread to do the same work on different data in parallel. Morton codes turn the problem into two operations both GPUs love: compute a code for each point (one thread per point, no coordination), then parallel-sort the results.
+Building a traditional quadtree is inherently recursive, and recursion is hostile to every kind of parallel hardware: parallel workers want to do the same work on different data. Morton codes turn tree construction into two operations that parallelize beautifully: compute a code for each point (no coordination between points), then sort the results.
 
-vizcrush runs the Morton-code step as a compute shader: each GPU thread processes one point, computes its Morton code, and writes it to an output buffer. No synchronization needed. Zero communication between threads. It's the textbook definition of "embarrassingly parallel", and embarrassingly parallel is what GPUs are for.
+vizcrush computes Morton codes in a single flat pass over the input in the WASM/JS compute layer — the textbook definition of "embarrassingly parallel," even when executed sequentially. That structure is the point: it makes the algorithm cache-friendly today, and it's the shape you'd hand to a GPU if profiling ever justified one (it hasn't yet — chapter 3).
 
 ## Spatial Hash Grid: When You Don't Want a Tree
 
@@ -101,6 +101,6 @@ The primes are chosen so that nearby cells get very different hash values, distr
 | Viewport range queries (zoom/pan)       | quadtree         |
 | Hover tooltip (1-NN, k-NN)              | kd-tree          |
 | Fixed-radius neighborhood, brush, lasso | hash grid        |
-| GPU-built spatial structure             | Morton (Z-order) |
+| Sort-based, cache-friendly construction | Morton (Z-order) |
 
 All four of these structures assume your data just _is_, a fixed set of points sitting still. But in the real world, new data arrives every second and old data ages out. That's a different world, and it has its own set of algorithms. Turn the page.
