@@ -44,7 +44,7 @@ let yi = u32((py - y_min) / y_range * f32(y_bins));
 atomicAdd(&grid[yi * x_bins + xi], 1u);
 ```
 
-The `atomicAdd` is essential in that world. Multiple GPU threads might try to increment the same cell simultaneously; without atomic operations you'd get race conditions and lost counts. Worth knowing — but also worth knowing that vizcrush ships exactly this shader only as an unwired draft. The shipping bin2d runs on WASM/JS, because at browser-realistic sizes the CPU finishes before GPU dispatch overhead pays for itself (chapter 3 has the arithmetic).
+The `atomicAdd` is essential in that world. Multiple GPU threads might try to increment the same cell simultaneously; without atomic operations you'd get race conditions and lost counts. Worth knowing — and vizcrush ships exactly this shader, wired, as an opt-in (`backend: "webgpu"`). Measuring it is what proved the point: end-to-end it runs ~15× slower than WASM at every realistic size, because upload and readback dominate (chapter 3 tells the story; ADR 0004 in the vizcrush repo has the receipts). The default bin2d runs on WASM/JS.
 
 ## Hexagonal Binning
 

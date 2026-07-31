@@ -36,7 +36,9 @@ Because Chromium is where most users are, and a 4× win in the common case is wo
 
 You may have noticed a missing engine. Binning half a million points is embarrassingly parallel; GPUs were built for exactly that; WebGPU exposes them to the browser. There are literally WGSL compute-shader drafts sitting in the vizcrush repository.
 
-They are not wired up, and the numbers above explain why. GPU compute pays a fixed toll: upload the data to GPU memory, compile and dispatch the shader, read the results back. That toll is on the order of milliseconds. Every operation in this book already finishes in single-digit milliseconds on the CPU at browser-realistic data sizes, so the GPU's parallelism has nothing to amortize; the CPU is done before the GPU finishes clearing its throat. If profiling ever surfaces a workload where that stops being true, the drafts are waiting.
+For bin2d — the most GPU-favourable of the five — we eventually wired the draft up to settle the question with data instead of arithmetic. It ships as an opt-in (`backend: "webgpu"`, silent fallback when the GPU can't run), and the measurement was unambiguous: correct to within a few f32 edge effects, and roughly 15× slower than WASM even taking its best run, at 100K, 1M, and 5M points alike. GPU compute pays a fixed toll — upload the data to GPU memory, dispatch the shader, read the results back — and every operation in this book already finishes in single-digit milliseconds on the CPU, so there is nothing for the GPU's parallelism to amortize. The CPU is done before the GPU finishes clearing its throat. (The numbers live in the vizcrush repo as ADR 0004.)
+
+The economics flip only when the data already lives on the GPU — a rendering pipeline consuming the grid without ever reading it back — or when several GPU steps chain against a single upload. The other four drafts wait for that day.
 
 So it's not "GPU good, CPU bad," and it's not "WASM fast, JS slow." It's: measure, on the engines your users actually run.
 
