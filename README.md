@@ -1,6 +1,6 @@
 # The vizcrush Book
 
-The free, web-native edition of _GPU-Accelerated Data Primitives for Browser Visualization_ — the companion book to the [vizcrush](https://github.com/pallavL01/vizcrush) library.
+The free, web-native edition of _High-Performance Data Primitives for Browser Visualization_ — the companion book to the [vizcrush](https://github.com/debug-diary-1/vizcrush) library.
 
 Read it online at **[book.vizcrush.dev](https://book.vizcrush.dev)** (once the GitHub Pages deploy lands) or build it locally.
 

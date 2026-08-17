@@ -4,7 +4,7 @@
 
 The rest of the book explains _what_ vizcrush does and _why_ it does it the way it does. This chapter is the bridge: how to actually call these functions from a real project. One code example per algorithm family, in TypeScript, with the understanding that every example assumes `pnpm install`, a bundler that handles ESM, and a modern browser.
 
-If you want to follow along, the library lives at [github.com/pallavL01/vizcrush](https://github.com/pallavL01/vizcrush).
+If you want to follow along, the library lives at [github.com/debug-diary-1/vizcrush](https://github.com/debug-diary-1/vizcrush).
 
 ## Install
 

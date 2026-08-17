@@ -46,4 +46,4 @@ Let's get into it.
 
 ---
 
-_This is the free, web-native edition of the book. The source lives at [github.com/pallavL01/vizcrush-book](https://github.com/pallavL01/vizcrush-book). vizcrush itself lives at [github.com/pallavL01/vizcrush](https://github.com/pallavL01/vizcrush)._
+_This is the free, web-native edition of the book. The source lives at [github.com/debug-diary-1/vizcrush-book](https://github.com/debug-diary-1/vizcrush-book). vizcrush itself lives at [github.com/debug-diary-1/vizcrush](https://github.com/debug-diary-1/vizcrush)._
