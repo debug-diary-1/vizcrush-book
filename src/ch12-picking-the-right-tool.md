@@ -71,7 +71,7 @@ Is it streaming?
    │    │
    │    What query pattern?
    │    ├─ Viewport / range (zoom/pan)       → quadtree
-   │    ├─ Hover picking (k-NN)              → kd-tree
+   │    ├─ Hover picking (k-NN)              → quadtree kNN
    │    ├─ Fixed-radius brush / lasso        → hash grid
    │    ├─ Sort-based, cache-friendly build  → Morton codes
    │    └─ Any of the above, but 3D          → octree (+ frustum)

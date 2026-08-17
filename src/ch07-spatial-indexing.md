@@ -35,7 +35,7 @@ A kd-tree splits space along alternating axes. Level 0 splits on X at the median
 
 The key advantage over quadtrees: kd-trees partition at the _median_, creating balanced trees. Quadtrees partition at the spatial center, which creates unbalanced trees when points cluster.
 
-For k-nearest-neighbor queries (hover tooltips), kd-trees are faster because the binary structure allows tighter pruning. You search the closer child first, establish a candidate distance, then only search the farther child if the splitting plane is closer than your current best, which it usually isn't.
+For k-nearest-neighbor queries (hover tooltips), kd-trees are faster because the binary structure allows tighter pruning. (vizcrush today serves kNN from the quadtree — a Rust kd-tree draft exists in the repo, unwired; the pruning idea below is why it might get wired someday.) You search the closer child first, establish a candidate distance, then only search the farther child if the splitting plane is closer than your current best, which it usually isn't.
 
 ## Morton Codes: GPU-Friendly Spatial Ordering
 
@@ -99,7 +99,7 @@ The primes are chosen so that nearby cells get very different hash values, distr
 | Workload                                | Use this         |
 | --------------------------------------- | ---------------- |
 | Viewport range queries (zoom/pan)       | quadtree         |
-| Hover tooltip (1-NN, k-NN)              | kd-tree          |
+| Hover tooltip (1-NN, k-NN)              | quadtree (kNN)   |
 | Fixed-radius neighborhood, brush, lasso | hash grid        |
 | Sort-based, cache-friendly construction | Morton (Z-order) |
 
